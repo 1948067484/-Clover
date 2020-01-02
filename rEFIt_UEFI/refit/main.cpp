@@ -34,6 +34,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+extern "C" {
+
 #include "entry_scan.h"
 //#include "Platform.h"
 //#include "../include/Handle.h"
@@ -42,7 +44,7 @@
 #include "Version.h"
 
 #ifndef DEBUG_ALL
-#define DEBUG_MAIN 1
+#define DEBUG_MAIN 2
 #else
 #define DEBUG_MAIN DEBUG_ALL
 #endif
@@ -114,6 +116,7 @@ extern HDA_OUTPUTS           AudioList[20];
 extern CHAR8                 *AudioOutputNames[];
 extern EFI_AUDIO_IO_PROTOCOL *AudioIo;
 
+}
 
 static EFI_STATUS LoadEFIImageList(IN EFI_DEVICE_PATH **DevicePaths,
                                     IN CHAR16 *ImageTitle,
@@ -2004,6 +2007,8 @@ VOID SystemVersionInit(VOID)
   }
 }
 
+#include "../cpp_util/lowlevel.h"
+#include "../cpp_util/XStringW.h"
 //
 // main entry point
 //
@@ -2080,6 +2085,32 @@ RefitMain (IN EFI_HANDLE           ImageHandle,
   #ifdef BUILDINFOS_STR
     DBG("Build with: [%a]\n", BUILDINFOS_STR);
   #endif // BUILDINFOS_STR
+
+{
+	XStringW str(L"local str value");
+	DBG("str = %s\n", str.data());
+	str.StrCat(L" appended text");
+	DBG("str = %s, len=%d\n", str.data(), str.length());
+	XStringW str2(str);
+	DBG("str2 = %s\n", str2.data());
+	str2.StrnCpy(str.data(), 2);
+	DBG("str2 = %s\n", str2.data());
+	str2.StrnCat(L"2ndtext", 2);
+	DBG("str2 = %s\n", str2.data());
+	str2.Insert(1, str);
+	DBG("str2 = %s\n", str2.data());
+	str2 += L"3rdtext";
+	DBG("str2 = %s\n", str2.data());
+
+	XStringW* str3 = new XStringW();
+	*str3 = L"str3data";
+	DBG("str3 = %s\n", str3->data());
+	delete str3;
+}
+DBG("press any key 9\n");
+PauseForKey(L"press");
+
+
 
   Status = InitRefitLib(gImageHandle);
   if (EFI_ERROR(Status))
