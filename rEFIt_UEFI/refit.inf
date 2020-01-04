@@ -317,7 +317,8 @@
 [BuildOptions]
 #  XCODE:*_*_*_CC_FLAGS = -fsigned-char -O2 -fno-common
   XCODE:*_*_*_CC_FLAGS = -fsigned-char -O2 -fno-omit-frame-pointer      -ffreestanding -fno-rtti -fno-exceptions -Wno-deprecated -Wno-writable-strings -Wno-unused-const-variable
-  XCODE:*_*_*_DLINK_FLAGS = -order_file $(EDK_TOOLS_PATH)/Scripts/ClangLinkOrder.txt
   GCC:*_*_*_CC_FLAGS = -std=c99 -Os -fno-omit-frame-pointer -maccumulate-outgoing-args
   GCC:*_*_*_CXX_FLAGS = -std=c++11 -Os -fno-omit-frame-pointer -maccumulate-outgoing-args   -ffreestanding -fno-rtti -fno-exceptions -Wno-deprecated -Wno-write-strings -Wno-unused-const-variable
    MSFT:*_*_*_CC_FLAGS = /Os /wd4201
+  
+  XCODE:*_XCODE5_*_MTOC_PATH         = $(EDK_TOOLS_PATH)/mtoc.NEW_jief
