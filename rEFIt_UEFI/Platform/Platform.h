@@ -10,6 +10,9 @@ Headers collection for procedures
 // Comment to use source debug options
 //#define DEBUG_ALL 2
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <Uefi.h>
 
@@ -2539,5 +2542,9 @@ YesNoMessage (
   IN CHAR16 *Title,
   IN CHAR16 *Message);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

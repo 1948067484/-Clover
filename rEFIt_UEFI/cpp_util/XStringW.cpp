@@ -16,19 +16,21 @@
 extern "C" {
   #include <Library/MemoryAllocationLib.h>
   #include <Library/BaseMemoryLib.h>
-  #include "Platform/Platform.h"
+	#include "Platform/Platform.h"
   #include "refit/IO.h"
 }
 
 UINTN XStringWGrowByDefault = 1024;
+//const XStringW NullXStringW;
 
 
 void XStringW::Init(UINTN aSize)
 {
-DBG("Init aSize=%d\n", aSize);
+//DBG("Init aSize=%d\n", aSize);
 	m_data = (wchar_t*)AllocatePool( (aSize+1)*sizeof(wchar_t) ); /* le 0 terminal n'est pas compté dans mSize */
 	if ( !m_data ) {
-//		throw 0xC0000017;
+		DebugLog(2, "XStringW::Init(%d) : AllocatePool returned NULL. Cpu halted\n", (aSize+1)*sizeof(wchar_t));
+		CpuDeadLoop();
 	}
 	m_size = aSize;
 	m_len = 0;
@@ -80,7 +82,7 @@ DBG("Constructor(const wchar_t aChar)\n");
 
 XStringW::~XStringW()
 {
-DBG("Destructeur :%s\n", data());
+DBG("Destructor :%s\n", data());
 	FreePool((void*)m_data);
 }
 
@@ -90,7 +92,7 @@ DBG("Destructeur :%s\n", data());
 
 void XStringW::SetLength(UINTN len)
 {
-DBG("SetLength(%d)\n", len);
+//DBG("SetLength(%d)\n", len);
 	m_len = len;
 	m_data[len] = 0;
 
@@ -108,11 +110,9 @@ wchar_t *XStringW::CheckSize(UINTN nNewSize, UINTN nGrowBy)
 	if ( m_size < nNewSize )
 	{
 		nNewSize += nGrowBy;
-//DBG("CheckSize: "); for (int i=0 ; i<8 ; i++) DBG("%x ", (UINT16)(m_data[i])); DBG("\n");
 		m_data = (wchar_t*)ReallocatePool(m_size*sizeof(wchar_t), (nNewSize+1)*sizeof(wchar_t), m_data);
-//DBG("CheckSize: "); for (int i=0 ; i<8 ; i++) DBG("%x ", (UINT16)(m_data[i])); DBG("\n");
 		if ( !m_data ) {
-  		DBG("XStringW::CheckSize() : ReallocatePool(%d, %d, %d) returned NULL. System halted\n", m_size, (nNewSize+1)*sizeof(wchar_t), m_data);
+  		DebugLog(2, "XStringW::CheckSize(%d, %d) : ReallocatePool(%d, %d, %d) returned NULL. System halted\n", nNewSize, nGrowBy, m_size, (nNewSize+1)*sizeof(wchar_t), m_data);
 	  	CpuDeadLoop();
 		}
 		m_size = nNewSize;
@@ -126,7 +126,7 @@ void XStringW::StrnCpy(const wchar_t *buf, UINTN len)
 		CheckSize(len, 0);
 		CopyMem(data(), buf, len*sizeof(wchar_t));
 	}
-	SetLength(len); /* SetLength fait _Data[len]=0 */
+	SetLength(len); /* data()[len]=0 done in SetLength */
 }
 
 void XStringW::StrCpy(const wchar_t *buf)
@@ -134,7 +134,7 @@ void XStringW::StrCpy(const wchar_t *buf)
 	if ( buf && *buf ) {
 		StrnCpy(buf, StrLen(buf));
 	}else{
-		SetLength(0); /* SetLength fait _Data[len]=0 */
+		SetLength(0); /* data()[0]=0 done in SetLength */
 	}
 }
 
@@ -147,11 +147,11 @@ void XStringW::StrnCat(const wchar_t *buf, UINTN len)
 		NewLen = length()+len;
 		CheckSize(NewLen, 0);
 		CopyMem(data(length()), buf, len*sizeof(wchar_t));
-		SetLength(NewLen); /* SetLength fait data()[len]=0 */
+		SetLength(NewLen); /* data()[NewLen]=0 done in SetLength */
 	}
 }
 
-void XStringW::StrCat(const wchar_t *buf)
+inline void XStringW::StrCat(const wchar_t *buf)
 {
 	if ( buf && *buf ) {
 		StrnCat(buf, StrLen(buf));
@@ -168,11 +168,9 @@ void XStringW::Delete(UINTN pos, UINTN count)
 	if ( pos < length() ) {
 		if ( count != MAX_UINTN  &&  pos + count < length() ) {
 			CopyMem( data(pos), data(pos+count), (length()-pos-count)*sizeof(wchar_t)); // CopyMem handles overlapping memory move
-			SetLength(length()-count);
-//			data()[length()] = 0; fait dans setlength();
+			SetLength(length()-count);/* data()[length()-count]=0 done in SetLength */
 		}else{
-			SetLength(pos);
-//			data()[length()] = 0; fait dans setlength();
+			SetLength(pos);/* data()[pos]=0 done in SetLength */
 		}
 	}
 }
@@ -183,9 +181,7 @@ void XStringW::Insert(UINTN pos, const XStringW& Str)
 		CheckSize(length()+Str.length());
 		CopyMem(data(pos + Str.length()),  data(pos),  (length()-pos)*sizeof(wchar_t));
 		CopyMem(data(pos), Str.data(), Str.length()*sizeof(wchar_t));
-		/**/ // Modification par Hassan le 10/09/2001 16:40:16
 		SetLength(length()+Str.length());
-		/**/
 	}else{
 		StrCat(Str);
 	}
@@ -200,9 +196,6 @@ void XStringW::Replace(wchar_t c1, wchar_t c2)
 		if ( *p == c1 ) *p = c2;
 		p += 1;
 	}
-	#if defined(_DEBUG) && defined(DEBUG_UTF8_COPY)
-		updatecmbs();
-	#endif
 }
 
 XStringW XStringW::SubStringReplace(wchar_t c1, wchar_t c2)
@@ -216,9 +209,6 @@ XStringW XStringW::SubStringReplace(wchar_t c1, wchar_t c2)
 		else Result += *p;
 		p++;
 	}
-	#if defined(_DEBUG) && defined(DEBUG_UTF8_COPY)
-		updatecmbs();
-	#endif
 	return Result;
 }
 
@@ -237,7 +227,6 @@ void XStringW::vSPrintf(const wchar_t *format, VA_LIST va)
   ps.Context  = (void*)&spc;
   ps.fmt.u.pw = format;
 
-  //ps.args     = args;
   VA_COPY(ps.args, va);
   _PPrint (&ps);
   VA_END(ps.args);
@@ -251,37 +240,20 @@ void XStringW::SPrintf(const wchar_t *format, ...)
 	vSPrintf(format, va);
 	VA_END(va);
 }
-//
-//XString XStringW::mbs() const
-//{
-//  char buf[mLen * MB_LEN_MAX + 1];
-//	size_t nbchar = wcstombs(buf, c, mLen * MB_LEN_MAX + 1);
-//	if ( nbchar == (size_t)-1 ) throw("XStringW::mbs() -> Conversion error");
-//	return XString(buf, nbchar);
-//}
 
 XStringW XStringW::basename() const
 {
 	UINTN idx = RIdxOf(LPATH_SEPARATOR);
-//	if ( idx == MAX_UINTN ) return NullXStringW;
+	if ( idx == MAX_UINTN ) return XStringW();
 	return SubString(idx+1, length()-idx-1);
 }
 
 XStringW XStringW::dirname() const
 {
 	UINTN idx = RIdxOf(LPATH_SEPARATOR);
-//	if ( idx == MAX_UINTN ) return NullXStringW;
+	if ( idx == MAX_UINTN ) return XStringW();
 	return SubString(0, idx);
 }
-
-//-------------------------------------------------------------------------------------------------
-// StringCompare
-//-------------------------------------------------------------------------------------------------
-// -1 si buf1 est plus grand
-//  0 si égal
-//  1 si buf2 est plus grand
-//-------------------------------------------------------------------------------------------------
-
 
 XStringW XStringW::SubString(UINTN pos, UINTN count) const
 {
@@ -425,14 +397,9 @@ void XStringW::RemoveLastEspCtrl()
 
 //*************************************************************************************************
 //
-//                                       Opérateurs =
+//                                       Operators =
 //
 //*************************************************************************************************
-
-
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Opérateur = CaractËres
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 const XStringW &XStringW::operator =(wchar_t aChar)
 {
@@ -441,36 +408,12 @@ const XStringW &XStringW::operator =(wchar_t aChar)
 	return *this;
 }
 
-
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Opérateur = Chaines
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 const XStringW &XStringW::operator =(const XStringW &aString)
 {
 //TRACE("Operator =const XStringW&\n");
 	StrnCpy(aString.data(), aString.length());
 	return *this;
 }
-
-#ifdef __AFXWIN_H__
-const XStringW &XStringW::operator =(const CString &aCString)
-{
-//TRACE("Operator =const CString&\n");
-	StrnCpy(aCString, aCString.GetLength());
-	return *this;
-}
-#endif
-
-#ifdef _WX_WXStringWH__
-const XStringW &XStringW::operator =(const wXStringW &awXStringW)
-{
-//TRACE("Operator =const wXStringW&\n");
-	StrnCpy(awXStringW.mb_str(), awXStringW.length());
-	return *this;
-}
-#endif
-
 
 const XStringW &XStringW::operator =(const wchar_t *S)
 {
@@ -483,14 +426,9 @@ const XStringW &XStringW::operator =(const wchar_t *S)
 
 //*************************************************************************************************
 //
-//                                       Opérateurs +=
+//                                       Operators +=
 //
 //*************************************************************************************************
-
-
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Opérateur = CaractËres
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 const XStringW &XStringW::operator +=(wchar_t aChar)
 {
@@ -498,11 +436,6 @@ const XStringW &XStringW::operator +=(wchar_t aChar)
 	StrnCat(&aChar, 1);
 	return *this;
 }
-
-
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Opérateur = Chaines
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 const XStringW &XStringW::operator +=(const XStringW &aString)
 {
@@ -520,7 +453,7 @@ const XStringW &XStringW::operator +=(const wchar_t *S)
 
 
 //-----------------------------------------------------------------------------
-//                                 Fonction
+//                                 Functions
 //-----------------------------------------------------------------------------
 
 XStringW SPrintf(const wchar_t *format, ...)
@@ -548,22 +481,11 @@ XStringW CleanCtrl(const XStringW &S)
   UINTN i;
 
 	for ( i=0 ; i<S.length() ; i+=1 ) {
-		if ( S[i] >=0  &&  S[i] < ' ' ) ReturnValue += 'x'; /* Les wchar_t sont signés !!! */
+		if ( S[i] >=0  &&  S[i] < ' ' ) ReturnValue += 'x'; /* wchar_t are signed !!! */
 		else ReturnValue += S[i];
 	}
 	return ReturnValue;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 #endif

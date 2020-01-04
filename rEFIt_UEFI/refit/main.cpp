@@ -34,11 +34,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "../Platform/Platform.h"
+#include "../cpp_util/XStringW.h"
+#include "../cpp_util/globals_ctor.h"
+#include "../cpp_util/globals_dtor.h"
+
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 #include "entry_scan.h"
-//#include "Platform.h"
-//#include "../include/Handle.h"
 #include "nanosvg.h"
 
 #include "Version.h"
@@ -2007,8 +2012,21 @@ VOID SystemVersionInit(VOID)
   }
 }
 
-#include "../cpp_util/lowlevel.h"
-#include "../cpp_util/XStringW.h"
+XStringW g_str(L"g_str:foobar");
+XStringW g_str2(L"g_str:foobar2");
+//XStringW g_str3(L"g_str:foobar2");
+//XStringW g_str4(L"g_str:foobar2");
+//XStringW g_str5(L"g_str:foobar2");
+//XStringW g_str6(L"g_str:foobar2");
+//XStringW g_str7(L"g_str:foobar2");
+//XStringW g_str8(L"g_str:foobar2");
+//XStringW g_str9(L"g_str:foobar2");
+//XStringW g_str10(L"g_str:foobar2");
+//XStringW g_str11(L"g_str:foobar2");
+//XStringW g_str12(L"g_str:foobar2");
+
+
+
 //
 // main entry point
 //
@@ -2086,35 +2104,51 @@ RefitMain (IN EFI_HANDLE           ImageHandle,
     DBG("Build with: [%a]\n", BUILDINFOS_STR);
   #endif // BUILDINFOS_STR
 
-{
-	XStringW str(L"local str value");
-	DBG("str = %s\n", str.data());
-	str.StrCat(L" appended text");
-	DBG("str = %s, len=%d\n", str.data(), str.length());
-	XStringW str2(str);
-	DBG("str2 = %s\n", str2.data());
-	str2.StrnCpy(str.data(), 2);
-	DBG("str2 = %s\n", str2.data());
-	str2.StrnCat(L"2ndtext", 2);
-	DBG("str2 = %s\n", str2.data());
-	str2.Insert(1, str);
-	DBG("str2 = %s\n", str2.data());
-	str2 += L"3rdtext";
-	DBG("str2 = %s\n", str2.data());
-
-	XStringW* str3 = new XStringW();
-	*str3 = L"str3data";
-	DBG("str3 = %s\n", str3->data());
-	delete str3;
-}
-DBG("press any key 9\n");
-PauseForKey(L"press");
-
-
 
   Status = InitRefitLib(gImageHandle);
   if (EFI_ERROR(Status))
     return Status;
+
+  DBG("Clover : Image base = 0x%x\n", SelfLoadedImage->ImageBase); // do not change, it's used by grep to feed the debugger
+
+
+  construct_globals_objects(); // do this after SelfLoadedImage is initialized
+
+DBG("g_str = %s\n", g_str.data());
+DBG("g_str2 = %s\n", g_str2.data());
+extern XStringW global_str1;
+DBG("global_str1 = %s\n", global_str1.data());
+extern XStringW global_str2;
+DBG("global_str2 = %s\n", global_str2.data());
+{
+//	XStringW str(L"local str value");
+//	DBG("str = %s\n", str.data());
+//	str.StrCat(L" appended text");
+//	DBG("str = %s, len=%d\n", str.data(), str.length());
+//
+//	XStringW str2(str);
+//	DBG("str2 = %s\n", str2.data());
+//	str2.StrnCpy(str.data(), 2);
+//	DBG("str2 = %s\n", str2.data());
+//	str2.StrnCat(L"2ndtext", 2);
+//	DBG("str2 = %s\n", str2.data());
+//	str2.Insert(1, str);
+//	DBG("str2 = %s\n", str2.data());
+//	str2 += L"3rdtext";
+//	DBG("str2 = %s\n", str2.data());
+//
+//	XStringW* str3 = new XStringW();
+//	*str3 = L"str3data";
+//	DBG("str3 = %s\n", str3->data());
+//	delete str3;
+}
+//
+destruct_globals_objects(NULL); // That should be done just before quitting clover module. Now, it's just for test.
+DBG("press");
+PauseForKey(L"press");
+
+
+
   //dumping SETTING structure
   // if you change something in Platform.h, please uncomment and test that all offsets
   // are natural aligned i.e. pointers are 8 bytes aligned
