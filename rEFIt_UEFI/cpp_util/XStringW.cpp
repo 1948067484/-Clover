@@ -21,7 +21,6 @@ extern "C" {
 }
 
 UINTN XStringWGrowByDefault = 1024;
-//const XStringW NullXStringW;
 
 
 void XStringW::Init(UINTN aSize)

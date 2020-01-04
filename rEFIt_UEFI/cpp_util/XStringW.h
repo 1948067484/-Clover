@@ -19,7 +19,6 @@ extern "C" {
 #define LPATH_SEPARATOR L'\\'
 
 extern UINTN XStringWGrowByDefault;
-extern void __GLOBAL__sub_I_XStringW();
 
 class XStringW
 {

@@ -38,6 +38,8 @@
 #include "../cpp_util/XStringW.h"
 #include "../cpp_util/globals_ctor.h"
 #include "../cpp_util/globals_dtor.h"
+#include "../cpp_util/global1.h"
+#include "../cpp_util/global2.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +49,19 @@ extern "C" {
 #include "nanosvg.h"
 
 #include "Version.h"
+
+
+void __GLOBAL__sub_I_main()
+{
+	#ifdef __clang__
+		asm("call __GLOBAL__sub_I_main.cpp");
+	#elif defined(__GNUC__)
+	  construct_globals_objects();
+	#else
+	  #error compiler not supported
+	#endif
+}
+
 
 #ifndef DEBUG_ALL
 #define DEBUG_MAIN 2
@@ -2111,8 +2126,9 @@ RefitMain (IN EFI_HANDLE           ImageHandle,
 
   DBG("Clover : Image base = 0x%x\n", SelfLoadedImage->ImageBase); // do not change, it's used by grep to feed the debugger
 
-
-  construct_globals_objects(); // do this after SelfLoadedImage is initialized
+__GLOBAL__sub_I_main(); // do this after SelfLoadedImage is initialized
+__GLOBAL__sub_I_global1();
+__GLOBAL__sub_I_global2();
 
 DBG("g_str = %s\n", g_str.data());
 DBG("g_str2 = %s\n", g_str2.data());
