@@ -2295,7 +2295,6 @@
 		A51C784521E0981C001385A7 /* HdaControllerHdaIo.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HdaControllerHdaIo.c; sourceTree = "<group>"; };
 		A51C784621E0981C001385A7 /* HdaControllerInfo.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HdaControllerInfo.c; sourceTree = "<group>"; };
 		A51C784721E0981C001385A7 /* HdaControllerMem.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HdaControllerMem.c; sourceTree = "<group>"; };
-		A51C784821E0981C001385A7 /* HdaModels.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HdaModels.c; sourceTree = "<group>"; };
 		A51C784921E0C280001385A7 /* HdaCodec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HdaCodec.h; sourceTree = "<group>"; };
 		A51F63C822DFB7E300086DB7 /* AppleFeatures.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppleFeatures.h; sourceTree = "<group>"; };
 		A51F63C922DFB81700086DB7 /* AppleApfsInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppleApfsInfo.h; sourceTree = "<group>"; };
@@ -7878,7 +7877,6 @@
 				A51C783821E0981C001385A7 /* AudioDxe.inf */,
 				A51C783921E0981C001385A7 /* HdaCodec */,
 				A51C784021E0981C001385A7 /* HdaController */,
-				A51C784821E0981C001385A7 /* HdaModels.c */,
 			);
 			path = AudioDxe;
 			sourceTree = "<group>";
