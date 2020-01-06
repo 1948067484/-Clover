@@ -5,7 +5,7 @@
 #if !defined(__XStringW_CPP__)
 #define __XStringW_CPP__
 
-#if 1
+#if 0
 #define DBG(...) DebugLog(2, __VA_ARGS__)
 #else
 #define DBG(...)
@@ -29,7 +29,7 @@ void XStringW::Init(UINTN aSize)
 //DBG("Init aSize=%d\n", aSize);
 	m_data = (wchar_t*)AllocatePool( (aSize+1)*sizeof(wchar_t) ); /* le 0 terminal n'est pas compté dans mSize */
 	if ( !m_data ) {
-		DebugLog(2, "XStringW::Init(%d) : AllocatePool returned NULL. Cpu halted\n", (aSize+1)*sizeof(wchar_t));
+		DBG("XStringW::Init(%d) : AllocatePool returned NULL. Cpu halted\n", (aSize+1)*sizeof(wchar_t));
 		CpuDeadLoop();
 	}
 	m_size = aSize;
@@ -112,7 +112,7 @@ wchar_t *XStringW::CheckSize(UINTN nNewSize, UINTN nGrowBy)
 		nNewSize += nGrowBy;
 		m_data = (wchar_t*)ReallocatePool(m_size*sizeof(wchar_t), (nNewSize+1)*sizeof(wchar_t), m_data);
 		if ( !m_data ) {
-  		DebugLog(2, "XStringW::CheckSize(%d, %d) : ReallocatePool(%d, %d, %d) returned NULL. System halted\n", nNewSize, nGrowBy, m_size, (nNewSize+1)*sizeof(wchar_t), m_data);
+  		DBG("XStringW::CheckSize(%d, %d) : ReallocatePool(%d, %d, %d) returned NULL. System halted\n", nNewSize, nGrowBy, m_size, (nNewSize+1)*sizeof(wchar_t), m_data);
 	  	CpuDeadLoop();
 		}
 		m_size = nNewSize;
