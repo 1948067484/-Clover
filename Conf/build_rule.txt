@@ -123,12 +123,12 @@
 
     <Command.GCC, Command.RVCT>
         # For RVCTCYGWIN CC_FLAGS must be first to work around pathing issues
-        "$(CC)" $(CXX_FLAGS) -c -o ${dst} $(INC) ${src}
-        "echo" [CC] ${s_base}
+        @"$(CC)" $(CXX_FLAGS) -c -o ${dst} $(INC) ${src}
+        @"echo" [CC] ${s_base}
 
     <Command.XCODE>
-        "$(CC)" $(CC_FLAGS) -o ${dst} $(INC) ${src}
-        "echo" [CC] ${s_base}
+        @"$(CC)" $(CC_FLAGS) -o ${dst} $(INC) ${src}
+        @"echo" [CC] ${s_base}
 
 [C-Code-File]
     <InputFile>
@@ -148,12 +148,12 @@
 
     <Command.GCC, Command.RVCT>
         # For RVCTCYGWIN CC_FLAGS must be first to work around pathing issues
-        "$(CC)" $(CC_FLAGS) -c -o ${dst} $(INC) ${src}
-        "echo" [CC] ${s_base}
+        @"$(CC)" $(CC_FLAGS) -c -o ${dst} $(INC) ${src}
+        @"echo" [CC] ${s_base}
 
     <Command.XCODE>
-        "$(CC)" $(CC_FLAGS) -o ${dst} $(INC) ${src}
-        "echo" [CC] ${s_base}
+        @"$(CC)" $(CC_FLAGS) -o ${dst} $(INC) ${src}
+        @"echo" [CC] ${s_base}
 
 [C-Code-File.BASE.AARCH64,C-Code-File.SEC.AARCH64,C-Code-File.PEI_CORE.AARCH64,C-Code-File.PEIM.AARCH64,C-Code-File.BASE.ARM,C-Code-File.SEC.ARM,C-Code-File.PEI_CORE.ARM,C-Code-File.PEIM.ARM]
     <InputFile>

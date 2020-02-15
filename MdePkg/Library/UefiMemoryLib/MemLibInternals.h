@@ -39,7 +39,7 @@ InternalMemCopyMem (
 /**
   Fills a target buffer with a byte value, and returns the target buffer.
 
-  This function wraps the gBS->SetMem().
+  This function wraps the ().gBS->SetMem
 
   @param  Buffer    Memory to set.
   @param  Size      The number of bytes to set.

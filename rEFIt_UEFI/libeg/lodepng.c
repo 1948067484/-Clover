@@ -83,8 +83,8 @@ void* lodepng_realloc(void* ptr, size_t new_size)
   return new_p+1;
 }
 
-#define memcpy(dest,source,count) gBS->CopyMem(dest,source,(UINTN)(count))
-#define memset(dest,ch,count)     gBS->SetMem(dest,(UINTN)(count),(UINT8)(ch))
+#define memcpy(dest,source,count) CopyMem(dest,source,(UINTN)(count))
+#define memset(dest,ch,count)     SetMem(dest,(UINTN)(count),(UINT8)(ch))
 
 
 //MODSNI ^
